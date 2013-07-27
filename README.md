@@ -26,8 +26,8 @@ common-mq supports the following message queue providers
       
       // SQS queue specific attributes
       attributes: { 
-        VisibilityTimeout: 60,
-        ReceiveMessageWaitTimeSeconds: 20
+        VisibilityTimeout: '60',
+        ReceiveMessageWaitTimeSeconds: '20'
       },
       
       // AWS config
