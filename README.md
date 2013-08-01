@@ -1,6 +1,6 @@
 # common-mq
 
-common-mq is an abstracted message queue client module which clean common API for working with various message queue providers.
+common-mq is an abstracted message queue client module with a clean, common API for working with various message queue providers.
 
 ## Provider Support
 
