@@ -8,8 +8,8 @@ common-mq supports the following message queue providers
 * AMQP [TODO]
 * STOMP [TODO]
 * RabbitMQ [TODO]
-* ØMQ [TODO]
-* Amazon AWS SQS [TODO]
+* ï¿½MQ [TODO]
+* Amazon AWS SQS
     
 ## Installation
 
