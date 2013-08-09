@@ -54,6 +54,22 @@ common-mq supports the following message queue providers
       console.log(message);
     });   
     
+## Documentation
+
+### Connecting to a Queue
+#### .connect(url, [options])
+Connects to a queue using a URL scheme (i.e, provider://hostname/queue).  The optional `options` argument passes provider specific configuration (see Providers section below).  Returns a reference to a queue.
+
+#### .connect(options)
+Connects to a queue using a config/options.  Provider, hostname, and queue name are all passed as properties of the `options` object (see Provdiers section below).  Returns a reference to a queue.
+
+### Providers
+
+#### AMQP
+
+#### Amazon SQS
+
+    
 ## License
 
     The MIT License (MIT)
