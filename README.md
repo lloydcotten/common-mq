@@ -73,6 +73,27 @@ Returns a reference to a queue.
       implOptions: { defaultExchangeName: '' } 
     });
 
+### Class: Queue
+#### Event: 'ready'
+Emitted when the queue is ready to publish or start start receiving messages.
+
+#### Event: 'message'
+Attaching the first listener to the `'message'` event will automatically subscribe to the queue.  When a message is received from the queue, the `'message'` event is emitted to all listeners.
+
+Arguments:
+    * message `string|object|Buffer`
+    * messageId `string`
+
+#### Event: 'error'
+Emmitted if an error occurs while communicating with the queue or receiving messages.
+
+Arguments:
+    * error `Error`
+
+#### .publish(message)
+
+#### .ack(messageId)
+
 ### Providers
 
 #### AMQP
