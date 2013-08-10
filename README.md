@@ -98,7 +98,7 @@ Publishes a message to the queue.  The message can be a JavaScript object, a str
 #### .ack(messageId)
 If the queue does not support automatically handle the removing of messages (once received by a subscriber), or this option is turned off in the options, you will need to call the the `.ack()` method once you have successfully received the message.  The underlying queue provider implementation will handle deleting or acknowledging the message, depending how that particular queue provider handles this concept.
 
-The messageId will be the same as passed by the `'message'` event callback.
+The `messageId` will be the same as passed by the `'message'` event callback.
 
 ### Providers
 
