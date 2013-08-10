@@ -81,18 +81,24 @@ Emitted when the queue is ready to publish or start start receiving messages.
 Attaching the first listener to the `'message'` event will automatically subscribe to the queue.  When a message is received from the queue, the `'message'` event is emitted to all listeners.
 
 Arguments:
+
     * message `string|object|Buffer`
     * messageId `string`
 
 #### Event: 'error'
-Emmitted if an error occurs while communicating with the queue or receiving messages.
+Emitted if an error occurs while communicating with the queue or receiving messages.
 
 Arguments:
+
     * error `Error`
 
 #### .publish(message)
+Publishes a message to the queue.  The message can be a JavaScript object, a string, or a Buffer.
 
 #### .ack(messageId)
+If the queue does not support automatically handle the removing of messages (once received by a subscriber), or this option is turned off in the options, you will need to call the the `.ack()` method once you have successfully received the message.  The underlying queue provider implementation will handle deleting or acknowledging the message, depending how that particular queue provider handles this concept.
+
+The messageId will be the same as passed by the `'message'` event callback.
 
 ### Providers
 
