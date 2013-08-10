@@ -82,15 +82,15 @@ Attaching the first listener to the `'message'` event will automatically subscri
 
 Arguments:
 
-    * message `string|object|Buffer`
-    * messageId `string`
+* message `string|object|Buffer`
+* messageId `string`
 
 #### Event: 'error'
 Emitted if an error occurs while communicating with the queue or receiving messages.
 
 Arguments:
 
-    * error `Error`
+* error `Error`
 
 #### .publish(message)
 Publishes a message to the queue.  The message can be a JavaScript object, a string, or a Buffer.
