@@ -54,6 +54,59 @@ common-mq supports the following message queue providers
       console.log(message);
     });   
     
+## Documentation
+
+### Connecting to a Queue
+#### .connect(url [, options])
+Connects to a queue using a URL scheme (i.e, provider://hostname/queue).  The optional `options` argument passes provider specific configuration (see [Providers](#providers) section below).  
+
+Returns a reference to a queue.
+
+    var queue = require('common-mq').connect('amqp://localhost/todos');
+
+#### .connect(options)
+Connects to a queue using a config/options.  Provider, hostname, and queue name are all passed as properties of the `options` object (see [Providers](#providers) section below).  
+
+Returns a reference to a queue.
+
+    var queue = require('common-mq').connect('amqp://localhost/todos', { 
+      implOptions: { defaultExchangeName: '' } 
+    });
+
+### Class: Queue
+#### Event: 'ready'
+Emitted when the queue is ready to publish or start start receiving messages.
+
+#### Event: 'message'
+Attaching the first listener to the `'message'` event will automatically subscribe to the queue.  When a message is received from the queue, the `'message'` event is emitted to all listeners.
+
+Arguments:
+
+* message `string|object|Buffer`
+* messageId `string`
+
+#### Event: 'error'
+Emitted if an error occurs while communicating with the queue or receiving messages.
+
+Arguments:
+
+* error `Error`
+
+#### .publish(message)
+Publishes a message to the queue.  The message can be a JavaScript object, a string, or a Buffer.
+
+#### .ack(messageId)
+If the queue does not support automatically removing messages (once received by a subscriber), or this option is turned off in the options, you will need to call the the `.ack()` method once you have successfully received the message.  The underlying queue provider implementation will handle deleting or acknowledging the message, depending how that particular queue provider handles this concept.
+
+The `messageId` will be the same as passed by the `'message'` event callback.
+
+### Providers
+
+#### AMQP
+
+#### Amazon SQS
+
+    
 ## License
 
     The MIT License (MIT)
