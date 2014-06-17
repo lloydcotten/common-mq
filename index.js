@@ -6,7 +6,9 @@ module.exports = exports = {
     if (typeof url === 'string') {
       url = parseUrl(url);
       options = options || {};
-      options.queueName = options.hostname = url.hostname;
+      options.hostname = url.hostname;
+      options.queueName = url.pathname || url.hostname;
+      options.queueName = options.queueName.replace(/^\/|\/$/g, '') || url.hostname;
       options.port = url.port;
       options.provider = url.protocol.substring(0, url.protocol.length - 1);
     } else {
