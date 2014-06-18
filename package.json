@@ -1,6 +1,6 @@
 {
   "name": "common-mq",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Abstracted message queue client for node.js supporting multiple message queue providers.",
   "main": "index.js",
   "scripts": {
