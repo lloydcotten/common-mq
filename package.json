@@ -1,6 +1,6 @@
 {
   "name": "common-mq",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "Abstracted message queue client for node.js supporting multiple message queue providers.",
   "main": "index.js",
   "scripts": {
@@ -9,8 +9,10 @@
   "author": "Lloyd Cotten",
   "license": "MIT",
   "dependencies": {
+    "async": "~0.2"
+  },
+  "optionalDependencies": {
     "aws-sdk": "~1.3",
-    "async": "~0.2",
     "amqp": "~0.1.7",
     "zmq": "~2.4.0"
   },
