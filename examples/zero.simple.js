@@ -1,14 +1,16 @@
+'use strict';
+
 var mq = require('../');
 
-var queue = mq.connect('zmq://127.0.0.1:5555/todods');
+var queue = mq.connect('zmq://127.0.0.1:5555/hello');
 queue.on('ready', function() {
   console.log('queue ready');
   startPublishing(function() {
-    queue.removeAllListeners();
-    queue.close();
-
-    delete queue;
+    queue.removeAllListeners('message');
+    console.log('unsubscribed');
   });
+
+  setTimeout(close, 10000)
 });
 
 queue.on('message', printMessage);
@@ -21,12 +23,22 @@ function printMessage(message) {
   console.log(message);
 }
 
+function close() {
+  queue.close();
+  console.log('queue closed');
+}
+
 function startPublishing(done) {
   setTimeout(publishOne, 1000);
   setTimeout(publishOne, 2000);
   setTimeout(publishOne, 3000);
 
-  setTimeout(done, 10000);
+  // This one will not be emitted since it occurs
+  // after the listener is removed
+  // It is included to demonstrate this behavior
+  setTimeout(publishOne, 6000);
+
+  setTimeout(done, 5000);
 }
 
 function publishOne() {
