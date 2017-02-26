@@ -2,7 +2,9 @@
 
 var mq = require('../');
 
-var queue = mq.connect('zmq://127.0.0.1:5555/hello');
+var queue = mq.connect('amqp://127.0.0.1:5672/hello', {
+  exchangeName: 'helloExchange'
+});
 queue.on('ready', function() {
   console.log('queue ready');
   startPublishing(function() {

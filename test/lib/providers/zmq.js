@@ -29,7 +29,9 @@ tap.beforeEach(function(done) {
   ZmqSocket.prototype.bind = sinon.stub().callsArgWith(1, null);
   ZmqSocket.prototype.send = sinon.stub();
   ZmqSocket.prototype.connect = sinon.stub();
+  ZmqSocket.prototype.disconnect = sinon.stub();
   ZmqSocket.prototype.subscribe = sinon.stub();
+  ZmqSocket.prototype.unbind = sinon.stub();
 
   done();
 });
@@ -137,7 +139,10 @@ tap.test('Calls socket `send` function with string message', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var expectedMessage = [validOptions.queueName, message];
+      var expectedMessage = [
+        validOptions.queueName,
+        validOptions.queueName + ' ' + message
+      ];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
@@ -154,7 +159,10 @@ tap.test('Calls socket `send` function with JSON string', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var expectedMessage = [validOptions.queueName, JSON.stringify(message)];
+      var expectedMessage = [
+        validOptions.queueName,
+        validOptions.queueName + ' ' + JSON.stringify(message)
+      ];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
@@ -171,7 +179,10 @@ tap.test('Calls socket `send` function with Buffer', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var expectedMessage = [validOptions.queueName, message.toString('base64')];
+      var expectedMessage = [
+        validOptions.queueName,
+        validOptions.queueName + ' ' + message.toString('base64')
+      ];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
@@ -187,7 +198,10 @@ tap.test('Calls publish function when already... "ready"', function(t) {
   emitter.once('ready', function() {
     provider.publish(message);
     setTimeout(function() {
-      var expectedMessage = [validOptions.queueName, message];
+      var expectedMessage = [
+        validOptions.queueName,
+        validOptions.queueName + ' ' + message
+      ];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
@@ -238,7 +252,7 @@ tap.test('Emits a string message event after subscribing', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      provider._subSock.emit('message', originalMessage);
+      provider._subSock.emit('message', validOptions.queueName, originalMessage);
     }, 20);
   });
 });
@@ -256,7 +270,7 @@ tap.test('Emits an object message event after subscribing', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      provider._subSock.emit('message', JSON.stringify(originalMessage));
+      provider._subSock.emit('message', validOptions.queueName, JSON.stringify(originalMessage));
     }, 20);
   });
 });
@@ -274,7 +288,7 @@ tap.test('Emits a Buffer message event after subscribing', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      provider._subSock.emit('message', originalMessage.toString('base64'));
+      provider._subSock.emit('message', validOptions.queueName, originalMessage.toString('base64'));
     }, 20);
   });
 });
@@ -295,20 +309,21 @@ tap.test('Subcribes to the queue when already... "ready"', function(t) {
   });
 });
 
-tap.test('Unsubscribing removes all sub socket "message" event listeners', function(t) {
+tap.test('Unsubscribing disconnects the sub socket', function(t) {
+  var expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
   var emitter = new EventEmitter();
   var provider = new ZmqProvider(emitter, validOptions);
 
   emitter.once('ready', function() {
-    provider._subSock.on('removeListener', function() {
-      t.equal(provider._subSock.listeners('message').length, 0);
-      t.ok(provider._isClosed);
-      t.end();
-    });
-
     provider.subscribe();
     setTimeout(function() {
       provider.unsubscribe();
+      setTimeout(function() {
+        t.ok(provider._subSock.disconnect.called);
+        t.equal(provider._subSock.disconnect.getCall(0).args[0], expectedUrl);
+        t.ok(provider._isClosed);
+        t.end();
+      }, 10);
     }, 10);
   });
 });
@@ -319,36 +334,27 @@ tap.test('Unsubscribing when queue provider is "closed" is ignored', function(t)
   var removeCount = 0;
 
   emitter.once('ready', function() {
-    provider._subSock.on('removeListener', function() {
-      removeCount++;
-    });
-
     provider.subscribe();
     setTimeout(function() {
       provider.unsubscribe();
       provider.unsubscribe();
       setTimeout(function() {
-        t.equal(removeCount, 1);
+        t.ok(provider._subSock.disconnect.calledOnce);
         t.end();
       }, 10);
     }, 10);
   });
 });
 
-tap.test('Unsubscribing removes all sub socket "message" event listeners', function(t) {
+tap.test('The `close` method unbinds the pub socket', function(t) {
+  var expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
   var emitter = new EventEmitter();
   var provider = new ZmqProvider(emitter, validOptions);
 
   emitter.once('ready', function() {
-    provider._subSock.on('removeListener', function() {
-      t.equal(provider._subSock.listeners('message').length, 0);
-      t.ok(provider._isClosed);
-      t.end();
-    });
-
-    provider.subscribe();
-    setTimeout(function() {
-      provider.unsubscribe();
-    }, 10);
+    provider.close();
+    t.ok(provider._pubSock.unbind.called);
+    t.equal(provider._pubSock.unbind.getCall(0).args[0], expectedUrl);
+    t.end();
   });
 });
