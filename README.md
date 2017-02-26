@@ -3,6 +3,8 @@
 common-mq is an abstracted message queue client package for Node.js with a clean, common API for working with
 various message queue providers.
 
+[![Build Status](https://travis-ci.org/lloydcotten/common-mq.svg?branch=master)](https://travis-ci.org/lloydcotten/common-mq)
+
 ## Provider Support
 
 common-mq supports the following message queue providers.
