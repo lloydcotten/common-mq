@@ -30,6 +30,9 @@ tap.beforeEach(function(done) {
   AWSStub.SQS.prototype.createQueue = sinon.stub().callsArgWith(1, null, {
     QueueUrl: fakeQueueUrl
   });
+  AWSStub.SQS.prototype.getQueueUrl = sinon.stub().callsArgWith(1, null, {
+    QueueUrl: fakeQueueUrl
+  });
 
   done();
 });
@@ -101,9 +104,24 @@ tap.test('Instantiates a new `AWS.SQS` object', function(t) {
   t.end();
 });
 
-tap.test('Creates or retrieves a QueueUrl on provider init', function(t) {
+tap.test('Gets the QueueUrl on provider init', function(t) {
   var providerOptions = { queueName: 'queue' };
   var provider = new SqsProvider(new EventEmitter(), providerOptions);
+
+  // Defer these tests since provider is initialized on next event loop
+  setTimeout(function() {
+    var expectedParams = { QueueName: providerOptions.queueName };
+    t.ok(provider._sqs.getQueueUrl.called);
+    t.same(provider._sqs.getQueueUrl.getCall(0).args[0], expectedParams);
+    t.equal(typeof provider._sqs.getQueueUrl.getCall(0).args[1], 'function');
+    t.end();
+  }, 10);
+});
+
+tap.test('Creates the queue on provider init if error callback from SQS `getQueueUrl`', function(t) {
+  var providerOptions = { queueName: 'queue' };
+  var provider = new SqsProvider(new EventEmitter(), providerOptions);
+  provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
@@ -121,6 +139,7 @@ tap.test('Creates or retrieves a QueueUrl on provider init (with attributes)', f
     attributes: { custom: 'attributes' }
   };
   var provider = new SqsProvider(new EventEmitter(), providerOptions);
+  provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
@@ -133,7 +152,7 @@ tap.test('Creates or retrieves a QueueUrl on provider init (with attributes)', f
   }, 10);
 });
 
-tap.test('Emits "ready" event on call back from `createQueue`', function(t) {
+tap.test('Emits "ready" event on call back from `getQueueUrl`', function(t) {
   var providerOptions = { queueName: 'queue' };
   var emitter = new EventEmitter();
   var provider = new SqsProvider(emitter, providerOptions);
@@ -144,12 +163,24 @@ tap.test('Emits "ready" event on call back from `createQueue`', function(t) {
   });
 });
 
-tap.test('Sets `_queueUrl` property with value called back from `createQueue`', function(t) {
+tap.test('Emits "ready" event on call back from `createQueue`', function(t) {
+  var providerOptions = { queueName: 'queue' };
+  var emitter = new EventEmitter();
+  var provider = new SqsProvider(emitter, providerOptions);
+  provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
+
+  emitter.on('ready', function() {
+    t.ok(emitter.isReady);
+    t.end();
+  });
+});
+
+tap.test('Sets `_queueUrl` property with value called back from `getQueueUrl`', function(t) {
   var providerOptions = { queueName: 'queue' };
   var emitter = new EventEmitter();
   var queueData = { QueueUrl: 'https://fake.sqs.url/test' };
   var provider = new SqsProvider(emitter, providerOptions);
-  AWSStub.SQS.prototype.createQueue = sinon.stub().callsArgWith(1, null, queueData);
+  provider._sqs.getQueueUrl.callsArgWith(1, null, queueData);
 
   emitter.on('ready', function() {
     t.equal(provider._queueUrl, queueData.QueueUrl);
@@ -157,16 +188,35 @@ tap.test('Sets `_queueUrl` property with value called back from `createQueue`', 
   });
 });
 
-tap.test('Emits "error" event if error called back from `createQueue`', function(t) {
+tap.test('Sets `_queueUrl` property with value called back from `createQueue`', function(t) {
   var providerOptions = { queueName: 'queue' };
   var emitter = new EventEmitter();
-  var expectedError = new Error('Test error');
+  var queueData = { QueueUrl: 'https://fake.sqs.url/test' };
   var provider = new SqsProvider(emitter, providerOptions);
-  AWSStub.SQS.prototype.createQueue = sinon.stub().callsArgWith(1, expectedError);
+  provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
+  provider._sqs.createQueue.callsArgWith(1, null, queueData);
 
-  emitter.on('error', function(err) {
-    t.equal(err, expectedError);
+  emitter.on('ready', function() {
+    t.equal(provider._queueUrl, queueData.QueueUrl);
     t.end();
+  });
+});
+
+tap.test('Emits "error" event twice if error called back from `createQueue`', function(t) {
+  var providerOptions = { queueName: 'queue' };
+  var emitter = new EventEmitter();
+  var getQueueUrlError = new Error('getQueueUrl error');
+  var createError = new Error('createQueue error');
+  var provider = new SqsProvider(emitter, providerOptions);
+  provider._sqs.getQueueUrl.callsArgWith(1, getQueueUrlError);
+  provider._sqs.createQueue.callsArgWith(1, createError);
+
+  emitter.once('error', function(err1) {
+    emitter.once('error', function(err2) {
+      t.equal(err1, getQueueUrlError);
+      t.equal(err2, createError);
+      t.end();
+    });
   });
 });
 
