@@ -11,11 +11,9 @@ var queue = mq.connect('sqs://hello', {
     ReceiveMessageWaitTimeSeconds: '2'
   },
 
-  // AWS config
-  // Replace with your AWS access id and secrety access key
+  // For mopre information on this configuration see:
+  // http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/configuring-the-jssdk.html
   awsConfig: {
-    accessKeyId: 'AWS_ACCESS_KEY_ID',
-    secretAccessKey: 'AWS_SECRET_ACCESS_KEY',
     region: 'us-east-1',
     maxRetries: 10
   }
@@ -36,6 +34,8 @@ queue.on('message', printMessage);
 
 queue.on('error', function(err) {
   console.log(err);
+  console.log('Do you need to setup your environment with your AWS credentials?');
+  console.log('http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html');
 });
 
 function printMessage(message) {

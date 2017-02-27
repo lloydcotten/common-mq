@@ -39,13 +39,7 @@ var queue = mq.connect('sqs://todos', {
     ReceiveMessageWaitTimeSeconds: '20'
   },
 
-  // AWS config
-  awsConfig: {
-    accessKeyId: 'ACCESS_KEY_HERE',
-    secretAccessKey: 'SECRET_KEY_HERE',
-    region: 'us-east-1'
-    maxRetries: 10
-  }
+  awsConfig: { region: 'us-east-1' }
 
 });
 
@@ -207,7 +201,7 @@ Required options:
 
 * provider `string` (when not using connection URL)
 * queueName `string` (when not using connection URL)
-* awsConfig `object|string` AWS config options to pass to the [`update` method](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#update-property), otherwise a path to AWS config file to pass to the [`loadFromPath` method](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#loadFromPath-property)
+* awsConfig `object|string` AWS config options to pass to the [`update` method](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#update-property), otherwise a path to AWS config file to pass to the [`loadFromPath` method](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Config.html#loadFromPath-property) - see [AWS Developer Guide](http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/configuring-the-jssdk.html) for more information
 
 Other options:
 
