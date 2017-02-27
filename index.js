@@ -1,8 +1,8 @@
 'use strict';
 
-var assert = require('assert');
-var parseUrl = require('url').parse;
-var Queue = require('./lib/queue');
+const assert = require('assert');
+const parseUrl = require('url').parse;
+const Queue = require('./lib/queue');
 
 module.exports = exports = {
   connect: function(url, options) {

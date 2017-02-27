@@ -1,23 +1,23 @@
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var proxyquire = require('proxyquire').noCallThru();
-var sinon = require('sinon');
-var tap = require('tap');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const proxyquire = require('proxyquire').noCallThru();
+const sinon = require('sinon');
+const tap = require('tap');
 
-var skip = false;
+let skip = false;
 
-var AWSStub = {
+const AWSStub = {
   config: {},
   SQS: sinon.stub()
 };
 
-var SqsProvider = proxyquire('../../../lib/providers/sqs', {
+const SqsProvider = proxyquire('../../../lib/providers/sqs', {
   'aws-sdk': AWSStub
 });
 
-var fakeQueueUrl = 'https://fake.sqs.url/test';
+const fakeQueueUrl = 'https://fake.sqs.url/test';
 
 tap.beforeEach(function(done) {
   AWSStub.SQS = sinon.stub();
@@ -50,14 +50,14 @@ tap.test('Throws an error if `options` args is not set', function(t) {
 });
 
 tap.test('Throws an error if `options` args is missing `queueName` property', function(t) {
-  var providerOptions = {};
+  const providerOptions = {};
 
   t.throws(function() { new SqsProvider({}, providerOptions); }, { message: /queueName.+not.+set/i });
   t.end();
 });
 
 tap.test('Does not throw an error if args are valid', function(t) {
-  var providerOptions = { queueName: 'queue' };
+  const providerOptions = { queueName: 'queue' };
 
   sinon.stub(SqsProvider.prototype, '_initProvider', function() { });
   t.doesNotThrow(function() { new SqsProvider({}, providerOptions); });
@@ -66,7 +66,7 @@ tap.test('Does not throw an error if args are valid', function(t) {
 });
 
 tap.test('Loads AWS config from a file if `awsConfig` is a string', function(t) {
-  var providerOptions =
+  const providerOptions =
   {
     queueName: 'queue',
     awsConfig: '/a/fake/aws/config'
@@ -81,7 +81,7 @@ tap.test('Loads AWS config from a file if `awsConfig` is a string', function(t) 
 });
 
 tap.test('Update AWS config from `awsConfig` object when set', function(t) {
-  var providerOptions =
+  const providerOptions =
   {
     queueName: 'queue',
     awsConfig: { some: 'aws', config: true }
@@ -96,10 +96,10 @@ tap.test('Update AWS config from `awsConfig` object when set', function(t) {
 });
 
 tap.test('Instantiates a new `AWS.SQS` object', function(t) {
-  var providerOptions = { queueName: 'queue' };
+  const providerOptions = { queueName: 'queue' };
 
   sinon.stub(SqsProvider.prototype, '_initProvider', function() { });
-  var provider = new SqsProvider({}, providerOptions);
+  const provider = new SqsProvider({}, providerOptions);
   t.ok(AWSStub.SQS.calledWithNew(), '`AWS.SQS` object was not instantiated.');
   t.type(provider._sqs, AWSStub.SQS);
   SqsProvider.prototype._initProvider.restore();
@@ -107,27 +107,27 @@ tap.test('Instantiates a new `AWS.SQS` object', function(t) {
 });
 
 tap.test('Gets the QueueUrl on provider init', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var provider = new SqsProvider(new EventEmitter(), providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const provider = new SqsProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
-    var expectedParams = { QueueName: providerOptions.queueName };
+    const expectedParams = { QueueName: providerOptions.queueName };
     t.ok(provider._sqs.getQueueUrl.called);
     t.same(provider._sqs.getQueueUrl.getCall(0).args[0], expectedParams);
     t.equal(typeof provider._sqs.getQueueUrl.getCall(0).args[1], 'function');
     t.end();
-  }, 10);
+  }, 20);
 });
 
 tap.test('Creates the queue on provider init if error callback from SQS `getQueueUrl`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var provider = new SqsProvider(new EventEmitter(), providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const provider = new SqsProvider(new EventEmitter(), providerOptions);
   provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
-    var expectedParams = { QueueName: providerOptions.queueName };
+    const expectedParams = { QueueName: providerOptions.queueName };
     t.ok(provider._sqs.createQueue.called);
     t.match(provider._sqs.createQueue.getCall(0).args[0], expectedParams);
     t.equal(typeof provider._sqs.createQueue.getCall(0).args[1], 'function');
@@ -136,16 +136,16 @@ tap.test('Creates the queue on provider init if error callback from SQS `getQueu
 });
 
 tap.test('Creates or retrieves a QueueUrl on provider init (with attributes)', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     attributes: { custom: 'attributes' }
   };
-  var provider = new SqsProvider(new EventEmitter(), providerOptions);
+  const provider = new SqsProvider(new EventEmitter(), providerOptions);
   provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
-    var expectedParams = {
+    const expectedParams = {
       QueueName: providerOptions.queueName,
       Attributes: providerOptions.attributes
     };
@@ -155,9 +155,9 @@ tap.test('Creates or retrieves a QueueUrl on provider init (with attributes)', f
 });
 
 tap.test('Emits "ready" event on call back from `getQueueUrl`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   emitter.on('ready', function() {
     t.ok(emitter.isReady);
@@ -166,9 +166,9 @@ tap.test('Emits "ready" event on call back from `getQueueUrl`', function(t) {
 });
 
 tap.test('Emits "ready" event on call back from `createQueue`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
   provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
 
   emitter.on('ready', function() {
@@ -178,10 +178,10 @@ tap.test('Emits "ready" event on call back from `createQueue`', function(t) {
 });
 
 tap.test('Sets `_queueUrl` property with value called back from `getQueueUrl`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var queueData = { QueueUrl: 'https://fake.sqs.url/test' };
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const queueData = { QueueUrl: 'https://fake.sqs.url/test' };
+  const provider = new SqsProvider(emitter, providerOptions);
   provider._sqs.getQueueUrl.callsArgWith(1, null, queueData);
 
   emitter.on('ready', function() {
@@ -191,10 +191,10 @@ tap.test('Sets `_queueUrl` property with value called back from `getQueueUrl`', 
 });
 
 tap.test('Sets `_queueUrl` property with value called back from `createQueue`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var queueData = { QueueUrl: 'https://fake.sqs.url/test' };
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const queueData = { QueueUrl: 'https://fake.sqs.url/test' };
+  const provider = new SqsProvider(emitter, providerOptions);
   provider._sqs.getQueueUrl.callsArgWith(1, new Error('getQueueUrl error'));
   provider._sqs.createQueue.callsArgWith(1, null, queueData);
 
@@ -205,11 +205,11 @@ tap.test('Sets `_queueUrl` property with value called back from `createQueue`', 
 });
 
 tap.test('Emits "error" event twice if error called back from `createQueue`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var getQueueUrlError = new Error('getQueueUrl error');
-  var createError = new Error('createQueue error');
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const getQueueUrlError = new Error('getQueueUrl error');
+  const createError = new Error('createQueue error');
+  const provider = new SqsProvider(emitter, providerOptions);
   provider._sqs.getQueueUrl.callsArgWith(1, getQueueUrlError);
   provider._sqs.createQueue.callsArgWith(1, createError);
 
@@ -223,17 +223,17 @@ tap.test('Emits "error" event twice if error called back from `createQueue`', fu
 });
 
 tap.test('Calls publish function with string message', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var message = 'test message';
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   provider.publish(message);
 
   emitter.once('ready', function() {
     // Defer this test to wait for all deferred methods in provider to run
     setTimeout(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: provider._queueUrl,
         MessageBody: message
       };
@@ -247,17 +247,17 @@ tap.test('Calls publish function with string message', function(t) {
 });
 
 tap.test('Calls publish function with JSON string', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var message = { test: 'obj', foo: 'bar' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const message = { test: 'obj', foo: 'bar' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   provider.publish(message);
 
   emitter.once('ready', function() {
     // Defer this test to wait for all deferred methods in provider to run
     setTimeout(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: provider._queueUrl,
         MessageBody: JSON.stringify(message)
       };
@@ -270,17 +270,17 @@ tap.test('Calls publish function with JSON string', function(t) {
 });
 
 tap.test('Calls publish function with Buffer', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   provider.publish(message);
 
   emitter.once('ready', function() {
     // Defer this test to wait for all deferred methods in provider to run
     setTimeout(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: provider._queueUrl,
         MessageBody: message.toString('base64')
       };
@@ -293,15 +293,15 @@ tap.test('Calls publish function with Buffer', function(t) {
 });
 
 tap.test('Calls publish function when already... "ready"', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var message = 'test message';
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   emitter.once('ready', function() {
     provider.publish(message);
     setTimeout(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: provider._queueUrl,
         MessageBody: message
       };
@@ -314,10 +314,10 @@ tap.test('Calls publish function when already... "ready"', function(t) {
 });
 
 tap.test('Emits "error" event if error called back from `sendMessage`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var expectedError = new Error('Test error');
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const expectedError = new Error('Test error');
+  const provider = new SqsProvider(emitter, providerOptions);
   AWSStub.SQS.prototype.sendMessage = sinon.stub().callsArgWith(1, expectedError);
 
   provider.publish('test message');
@@ -329,9 +329,9 @@ tap.test('Emits "error" event if error called back from `sendMessage`', function
 });
 
 tap.test('Starts polling if subscribing before ready event', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
   provider._startPolling = sinon.stub();
 
   provider.subscribe();
@@ -345,9 +345,9 @@ tap.test('Starts polling if subscribing before ready event', function(t) {
 });
 
 tap.test('Starts polling if subscribing after ready event', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
   provider._startPolling = sinon.stub();
 
   emitter.once('ready', function(err) {
@@ -360,9 +360,9 @@ tap.test('Starts polling if subscribing after ready event', function(t) {
 });
 
 tap.test('Sets `_isClosed` property to true on unsubscribe', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   t.notOk(provider._isClosed);
   provider.unsubscribe();
@@ -378,9 +378,9 @@ if (process.platform === 'win32') {
 }
 
 tap.test('`_poll` method is called repeatedly until unsubscribed', { skip: skip }, function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
   sinon.stub(provider, '_poll', function(cb) {
     setTimeout(cb, 10);
   });
@@ -397,12 +397,12 @@ tap.test('`_poll` method is called repeatedly until unsubscribed', { skip: skip 
 });
 
 tap.test('`_poll` method is called with delay as set in options', { skip: skip }, function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     delayBetweenPolls: 0.01 // 10 milliseconds
   };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
   sinon.stub(provider, '_poll', function(cb) {
     setTimeout(cb, 10);
   });
@@ -420,13 +420,13 @@ tap.test('`_poll` method is called with delay as set in options', { skip: skip }
 });
 
 tap.test('`_poll` calls the SQS `_receiveMessage` with default params', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   emitter.once('ready', function() {
     provider._poll(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: fakeQueueUrl,
         MaxNumberOfMessages: 1
       };
@@ -438,16 +438,16 @@ tap.test('`_poll` calls the SQS `_receiveMessage` with default params', function
 });
 
 tap.test('`_poll` calls the SQS `_receiveMessage` with max number of messages set', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     maxReceiveCount: 10
   };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   emitter.once('ready', function() {
     provider._poll(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: fakeQueueUrl,
         MaxNumberOfMessages: 10
       };
@@ -458,16 +458,16 @@ tap.test('`_poll` calls the SQS `_receiveMessage` with max number of messages se
 });
 
 tap.test('`_poll` calls the SQS `_receiveMessage` with custom visibility timeout set', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     visibilityTimeout: 10
   };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   emitter.once('ready', function() {
     provider._poll(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: fakeQueueUrl,
         MaxNumberOfMessages: 1,
         VisibilityTimeout: 10,
@@ -480,16 +480,16 @@ tap.test('`_poll` calls the SQS `_receiveMessage` with custom visibility timeout
 });
 
 tap.test('`_poll` calls the SQS `_receiveMessage` with custom wait time seconds set', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     waitTimeSeconds: 10
   };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   emitter.once('ready', function() {
     provider._poll(function() {
-      var expectedParams = {
+      const expectedParams = {
         QueueUrl: fakeQueueUrl,
         MaxNumberOfMessages: 1,
         WaitTimeSeconds: 10
@@ -501,9 +501,9 @@ tap.test('`_poll` calls the SQS `_receiveMessage` with custom wait time seconds 
 });
 
 tap.test('`_poll` does not emit a "message" event if no messages returned from SQS `_receiveMessage`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
 
   emitter.once('message', function() {
     t.fail('"message" event should not be called');
@@ -517,10 +517,10 @@ tap.test('`_poll` does not emit a "message" event if no messages returned from S
 });
 
 tap.test('`_poll` emits error on SQS `_receiveMessage` callback error', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var testError = new Error('Test error');
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const testError = new Error('Test error');
   provider._sqs.receiveMessage = sinon.stub().callsArgWith(1, testError);
 
   setTimeout(function() {
@@ -534,10 +534,10 @@ tap.test('`_poll` emits error on SQS `_receiveMessage` callback error', function
 });
 
 tap.test('`_poll` emits a string message event', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var data = {
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const data = {
     Messages: [{ Body: 'Test Message 1', ReceiptHandle: 'abc' }]
   };
   provider._sqs.receiveMessage = sinon.stub().callsArgWith(1, null, data);
@@ -554,11 +554,11 @@ tap.test('`_poll` emits a string message event', function(t) {
 });
 
 tap.test('`_poll` emits an object message event', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var message = { test: 'message', foo: 'bar' };
-  var data = {
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const message = { test: 'message', foo: 'bar' };
+  const data = {
     Messages: [{ Body: JSON.stringify(message), ReceiptHandle: 'abc' }]
   };
   provider._sqs.receiveMessage = sinon.stub().callsArgWith(1, null, data);
@@ -575,11 +575,11 @@ tap.test('`_poll` emits an object message event', function(t) {
 });
 
 tap.test('`_poll` emits a Buffer message event', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  var data = {
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const data = {
     Messages: [{ Body: message.toString('base64'), ReceiptHandle: 'abc' }]
   };
   provider._sqs.receiveMessage = sinon.stub().callsArgWith(1, null, data);
@@ -596,14 +596,14 @@ tap.test('`_poll` emits a Buffer message event', function(t) {
 });
 
 tap.test('Calls `_deleteMessage` if `deleteAfterReceive` is true', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     deleteAfterReceive: true
   };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var message = 'test';
-  var data = {
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const message = 'test';
+  const data = {
     Messages: [{ Body: message.toString('base64'), ReceiptHandle: 'abc' }]
   };
   provider._sqs.receiveMessage = sinon.stub().callsArgWith(1, null, data);
@@ -619,14 +619,14 @@ tap.test('Calls `_deleteMessage` if `deleteAfterReceive` is true', function(t) {
 });
 
 tap.test('Does not call `_deleteMessage` if already unsubscribed', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     deleteAfterReceive: true
   };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var message = 'test';
-  var data = {
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const message = 'test';
+  const data = {
     Messages: [{ Body: message.toString('base64'), ReceiptHandle: 'abc' }]
   };
   provider._sqs.receiveMessage = sinon.stub().callsArgWith(1, null, data);
@@ -644,10 +644,10 @@ tap.test('Does not call `_deleteMessage` if already unsubscribed', function(t) {
 });
 
 tap.test('`ack` calls `_deleteMessage`', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var messageId = 'test';
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const messageId = 'test';
   provider._deleteMessage = sinon.stub();
 
   emitter.once('ready', function() {
@@ -661,12 +661,12 @@ tap.test('`ack` calls `_deleteMessage`', function(t) {
 });
 
 tap.test('Ignores `ack` if `deleteAfterReceive` is set to true', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     deleteAfterReceive: true
   };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
   provider._deleteMessage = sinon.stub();
 
   emitter.once('ready', function() {
@@ -679,10 +679,10 @@ tap.test('Ignores `ack` if `deleteAfterReceive` is set to true', function(t) {
 });
 
 tap.test('`_deleteMessage` calls the SQS `deleteMessage` method', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var expectedParams = {
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const expectedParams = {
     QueueUrl: fakeQueueUrl,
     ReceiptHandle: 'test'
   };
@@ -697,10 +697,10 @@ tap.test('`_deleteMessage` calls the SQS `deleteMessage` method', function(t) {
 });
 
 tap.test('Emits "error" event if SQS `deleteMessage` calls back an error', function(t) {
-  var providerOptions = { queueName: 'queue' };
-  var emitter = new EventEmitter();
-  var provider = new SqsProvider(emitter, providerOptions);
-  var testError = new Error('test error');
+  const providerOptions = { queueName: 'queue' };
+  const emitter = new EventEmitter();
+  const provider = new SqsProvider(emitter, providerOptions);
+  const testError = new Error('test error');
   provider._sqs.deleteMessage = sinon.stub().callsArgWith(1, testError);
 
   emitter.once('error', function(err) {

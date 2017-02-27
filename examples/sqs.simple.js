@@ -1,6 +1,6 @@
-var mq = require('../index.js');
+const mq = require('../index.js');
 
-var queue = mq.connect('sqs://hello', {
+const queue = mq.connect('sqs://hello', {
 
   // delete the message after emitting 'message' event
   deleteAfterReceive: true,

@@ -1,8 +1,8 @@
 'use strict';
 
-var mq = require('../');
+const mq = require('../');
 
-var queue = mq.connect('amqp://127.0.0.1:5672/hello', {
+const queue = mq.connect('amqp://127.0.0.1:5672/hello', {
   exchangeName: 'helloExchange'
 });
 queue.on('ready', function() {
