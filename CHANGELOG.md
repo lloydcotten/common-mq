@@ -9,6 +9,7 @@ Changes:
 - Add unit tests
 - Integrate with TravisCI, AppVeyor, and Coveralls
 - Change ZeroMQ dependency to use better supported library with prebuilt binaries
+- AWS config credentials can be set from your environment using recommended practices
 
 Bug Fixes:
 - AMQP provider implementation should work in more situations now
