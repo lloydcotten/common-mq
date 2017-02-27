@@ -1,12 +1,12 @@
 'use strict';
 
-var proxyquire = require('proxyquire');
-var sinon = require('sinon');
-var tap = require('tap');
+const proxyquire = require('proxyquire');
+const sinon = require('sinon');
+const tap = require('tap');
 
-var QueueStub = sinon.stub();
+const QueueStub = sinon.stub();
 
-var mq = proxyquire('../', {
+const mq = proxyquire('../', {
   './lib/queue': QueueStub
 });
 
@@ -46,8 +46,8 @@ tap.test('Throw an error if options object does not contain a `queueName` proper
 });
 
 tap.test('Instantiates a new queue', function(t) {
-  var queue = mq.connect('test://queue');
-  var expectedOptions = {
+  const queue = mq.connect('test://queue');
+  const expectedOptions = {
     provider: 'test',
     queueName: 'queue'
   };
@@ -60,11 +60,11 @@ tap.test('Instantiates a new queue', function(t) {
 });
 
 tap.test('Instantiates a new queue when using options object', function(t) {
-  var options = {
+  const options = {
     provider: 'test',
     queueName: 'queue'
   };
-  var queue = mq.connect(options);
+  const queue = mq.connect(options);
 
   t.ok(QueueStub.calledWithNew(), 'Queue did not instantiate.');
   t.equal(QueueStub.getCall(0).args[0], options);
@@ -72,8 +72,8 @@ tap.test('Instantiates a new queue when using options object', function(t) {
 });
 
 tap.test('Instantiates a new queue when string URL and options object', function(t) {
-  var queue = mq.connect('test://queue', { customProperty: 'test' });
-  var expectedOptions = {
+  const queue = mq.connect('test://queue', { customProperty: 'test' });
+  const expectedOptions = {
     provider: 'test',
     queueName: 'queue',
     customProperty: 'test'

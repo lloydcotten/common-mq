@@ -1,26 +1,24 @@
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var proxyquire = require('proxyquire').noCallThru();
-var sinon = require('sinon');
-var tap = require('tap');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const proxyquire = require('proxyquire').noCallThru();
+const sinon = require('sinon');
+const tap = require('tap');
 
-var AmqpQueueStub = function() { };
-var AmqpExchangeStub = function() { };
-var AmqpConnectionStub = function() { };
+const AmqpQueueStub = function() { };
+const AmqpExchangeStub = function() { };
+const AmqpConnectionStub = function() { };
 util.inherits(AmqpConnectionStub, EventEmitter);
 
-var amqpStub = {
-  createConnection: sinon.stub()
-};
+const amqpStub = { createConnection: sinon.stub() };
 
-var AmqpProvider = proxyquire('../../../lib/providers/amqp', {
+const AmqpProvider = proxyquire('../../../lib/providers/amqp', {
   'amqp': amqpStub
 });
 
-var SubscribePromise = function() { };
-var fakeConsumerTag = 'test123';
+const SubscribePromise = function() { };
+const fakeConsumerTag = 'test123';
 
 
 tap.beforeEach(function(done) {
@@ -57,14 +55,14 @@ tap.test('Throws an error if `options` args is not set', function(t) {
 });
 
 tap.test('Throws an error if `options` args is missing `queueName` property', function(t) {
-  var providerOptions = {};
+  const providerOptions = {};
 
   t.throws(function() { new AmqpProvider({}, providerOptions); }, { message: /queueName.+not.+set/i });
   t.end();
 });
 
 tap.test('Throws an error if `options` args is missing `exchangeName` property', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue'
   };
 
@@ -73,7 +71,7 @@ tap.test('Throws an error if `options` args is missing `exchangeName` property',
 });
 
 tap.test('Does not throw an error if args are valid', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
@@ -85,11 +83,11 @@ tap.test('Does not throw an error if args are valid', function(t) {
 });
 
 tap.test('Creates a connection with provider options', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var provider = new AmqpProvider(new EventEmitter(), providerOptions);
+  const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
@@ -100,11 +98,11 @@ tap.test('Creates a connection with provider options', function(t) {
 });
 
 tap.test('Creates an exchange using specified name', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var provider = new AmqpProvider(new EventEmitter(), providerOptions);
+  const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
@@ -120,11 +118,11 @@ tap.test('Creates an exchange using specified name', function(t) {
 });
 
 tap.test('Creates a queue using specified name', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var provider = new AmqpProvider(new EventEmitter(), providerOptions);
+  const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
@@ -138,11 +136,11 @@ tap.test('Creates a queue using specified name', function(t) {
 });
 
 tap.test('Binds the queue to the exchange', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var provider = new AmqpProvider(new EventEmitter(), providerOptions);
+  const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
@@ -157,12 +155,12 @@ tap.test('Binds the queue to the exchange', function(t) {
 });
 
 tap.test('Sets emmitter to ready', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
   setTimeout(function() { provider._connection.emit('ready'); }, 10);
@@ -174,13 +172,13 @@ tap.test('Sets emmitter to ready', function(t) {
 });
 
 tap.test('Calls publish function with string message', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var message = 'test message';
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   provider.publish(message);
 
@@ -198,13 +196,13 @@ tap.test('Calls publish function with string message', function(t) {
 });
 
 tap.test('Calls publish function with JSON string', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var message = { test: 'obj', foo: 'bar' };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const message = { test: 'obj', foo: 'bar' };
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   provider.publish(message);
 
@@ -222,13 +220,13 @@ tap.test('Calls publish function with JSON string', function(t) {
 });
 
 tap.test('Calls publish function with Buffer', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   provider.publish(message);
 
@@ -246,13 +244,13 @@ tap.test('Calls publish function with Buffer', function(t) {
 });
 
 tap.test('Calls publish function when already... "ready"', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var message = 'test message';
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
   setTimeout(function() { provider._connection.emit('ready'); }, 10);
@@ -269,12 +267,12 @@ tap.test('Calls publish function when already... "ready"', function(t) {
 });
 
 tap.test('Subscribes to the queue with a listener', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
@@ -291,12 +289,12 @@ tap.test('Subscribes to the queue with a listener', function(t) {
 });
 
 tap.test('Emits a string message event after subscribing', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
@@ -304,8 +302,8 @@ tap.test('Emits a string message event after subscribing', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var handler = provider._queue.subscribe.getCall(0).args[0];
-      var originalMessage = 'test message';
+      const handler = provider._queue.subscribe.getCall(0).args[0];
+      const originalMessage = 'test message';
       emitter.on('message', function(message) {
         t.equal(message, originalMessage);
         t.end();
@@ -317,12 +315,12 @@ tap.test('Emits a string message event after subscribing', function(t) {
 });
 
 tap.test('Emits an object message event after subscribing', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
@@ -330,8 +328,8 @@ tap.test('Emits an object message event after subscribing', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var handler = provider._queue.subscribe.getCall(0).args[0];
-      var originalMessage = { test: 'test', foo: 'bar' };
+      const handler = provider._queue.subscribe.getCall(0).args[0];
+      const originalMessage = { test: 'test', foo: 'bar' };
       emitter.on('message', function(message) {
         t.same(message, originalMessage);
         t.end();
@@ -343,12 +341,12 @@ tap.test('Emits an object message event after subscribing', function(t) {
 });
 
 tap.test('Emits a Buffer message event after subscribing', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
@@ -356,8 +354,8 @@ tap.test('Emits a Buffer message event after subscribing', function(t) {
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var handler = provider._queue.subscribe.getCall(0).args[0];
-      var originalMessage = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      const handler = provider._queue.subscribe.getCall(0).args[0];
+      const originalMessage = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
       emitter.on('message', function(message) {
         t.same(message, originalMessage);
         t.end();
@@ -369,12 +367,12 @@ tap.test('Emits a Buffer message event after subscribing', function(t) {
 });
 
 tap.test('Subcribes to the queue with a listener when already... "ready"', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
   setTimeout(function() { provider._connection.emit('ready'); }, 10);
@@ -390,12 +388,12 @@ tap.test('Subcribes to the queue with a listener when already... "ready"', funct
 });
 
 tap.test('Unsubscribes from the queue the queue', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
@@ -414,12 +412,12 @@ tap.test('Unsubscribes from the queue the queue', function(t) {
 });
 
 tap.test('Unbinds from the queue on close', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
   setTimeout(function() { provider._connection.emit('ready'); }, 10);
@@ -436,12 +434,12 @@ tap.test('Unbinds from the queue on close', function(t) {
 });
 
 tap.test('Destroys the exchange and queue on close', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
   setTimeout(function() { provider._connection.emit('ready'); }, 10);
@@ -457,12 +455,12 @@ tap.test('Destroys the exchange and queue on close', function(t) {
 });
 
 tap.test('Disconnects the connection on close', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
-  var emitter = new EventEmitter();
-  var provider = new AmqpProvider(emitter, providerOptions);
+  const emitter = new EventEmitter();
+  const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
   setTimeout(function() { provider._connection.emit('ready'); }, 10);

@@ -1,8 +1,8 @@
 'use strict';
 
-var mq = require('../');
+const mq = require('../');
 
-var queue = mq.connect('zmq://127.0.0.1:5555/hello');
+const queue = mq.connect('zmq://127.0.0.1:5555/hello');
 queue.on('ready', function() {
   console.log('queue ready');
   startPublishing(function() {

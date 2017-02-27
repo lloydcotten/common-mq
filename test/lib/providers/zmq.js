@@ -1,23 +1,21 @@
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var proxyquire = require('proxyquire').noCallThru();
-var sinon = require('sinon');
-var tap = require('tap');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const proxyquire = require('proxyquire').noCallThru();
+const sinon = require('sinon');
+const tap = require('tap');
 
-var ZmqSocket = function() { };
+const ZmqSocket = function() { };
 util.inherits(ZmqSocket, EventEmitter);
 
-var zmqStub = {
-  socket: sinon.stub()
-};
+const zmqStub = { socket: sinon.stub() };
 
-var ZmqProvider = proxyquire('../../../lib/providers/zmq', {
+const ZmqProvider = proxyquire('../../../lib/providers/zmq', {
   'zeromq': zmqStub
 });
 
-var validOptions = {
+const validOptions = {
   queueName: 'queue',
   hostname: 'test',
   port: 1234
@@ -47,14 +45,14 @@ tap.test('Throws an error if `options` args is not set', function(t) {
 });
 
 tap.test('Throws an error if `options` args is missing `queueName` property', function(t) {
-  var providerOptions = {};
+  const providerOptions = {};
 
   t.throws(function() { new ZmqProvider({}, providerOptions); }, { message: /queueName.+not.+set/i });
   t.end();
 });
 
 tap.test('Throws an error if `options` args is missing `hostname` property', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue'
   };
 
@@ -63,7 +61,7 @@ tap.test('Throws an error if `options` args is missing `hostname` property', fun
 });
 
 tap.test('Throws an error if `options` args is missing `port` property', function(t) {
-  var providerOptions = {
+  const providerOptions = {
     queueName: 'queue',
     hostname: 'test'
   };
@@ -80,7 +78,7 @@ tap.test('Does not throw an error if args are valid', function(t) {
 });
 
 tap.test('Creates a sub socket', function(t) {
-  var provider = new ZmqProvider(new EventEmitter(), validOptions);
+  const provider = new ZmqProvider(new EventEmitter(), validOptions);
 
   t.ok(zmqStub.socket.calledWith('sub'));
   t.ok(provider._subSock);
@@ -88,7 +86,7 @@ tap.test('Creates a sub socket', function(t) {
 });
 
 tap.test('Creates a pub socket', function(t) {
-  var provider = new ZmqProvider(new EventEmitter(), validOptions);
+  const provider = new ZmqProvider(new EventEmitter(), validOptions);
 
   t.ok(zmqStub.socket.calledWith('pub'));
   t.ok(provider._pubSock);
@@ -96,8 +94,8 @@ tap.test('Creates a pub socket', function(t) {
 });
 
 tap.test('Binds to the pub socket', function(t) {
-  var provider = new ZmqProvider(new EventEmitter(), validOptions);
-  var expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
+  const provider = new ZmqProvider(new EventEmitter(), validOptions);
+  const expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
 
   // Defer these tests since provider is initialized on next event loop
   setTimeout(function() {
@@ -109,7 +107,7 @@ tap.test('Binds to the pub socket', function(t) {
 });
 
 tap.test('Sets emmitter to ready once bound to pub socket', function(t) {
-  var emitter = new EventEmitter();
+  const emitter = new EventEmitter();
   new ZmqProvider(emitter, validOptions);
 
   emitter.once('ready', function() {
@@ -119,9 +117,9 @@ tap.test('Sets emmitter to ready once bound to pub socket', function(t) {
 });
 
 tap.test('Emits an error on when error called back from pub socket bind', function(t) {
-  var testError = new Error('test error');
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const testError = new Error('test error');
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
   provider._pubSock.bind = sinon.stub().callsArgWith(1, testError);
 
   emitter.once('error', function(err) {
@@ -131,15 +129,15 @@ tap.test('Emits an error on when error called back from pub socket bind', functi
 });
 
 tap.test('Calls socket `send` function with string message', function(t) {
-  var message = 'test message';
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
 
   provider.publish(message);
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var expectedMessage = [
+      const expectedMessage = [
         validOptions.queueName,
         validOptions.queueName + ' ' + message
       ];
@@ -151,15 +149,15 @@ tap.test('Calls socket `send` function with string message', function(t) {
 });
 
 tap.test('Calls socket `send` function with JSON string', function(t) {
-  var message = { test: 'obj', foo: 'bar' };
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const message = { test: 'obj', foo: 'bar' };
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
 
   provider.publish(message);
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var expectedMessage = [
+      const expectedMessage = [
         validOptions.queueName,
         validOptions.queueName + ' ' + JSON.stringify(message)
       ];
@@ -171,15 +169,15 @@ tap.test('Calls socket `send` function with JSON string', function(t) {
 });
 
 tap.test('Calls socket `send` function with Buffer', function(t) {
-  var message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const message = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
 
   provider.publish(message);
 
   emitter.once('ready', function() {
     setTimeout(function() {
-      var expectedMessage = [
+      const expectedMessage = [
         validOptions.queueName,
         validOptions.queueName + ' ' + message.toString('base64')
       ];
@@ -191,14 +189,14 @@ tap.test('Calls socket `send` function with Buffer', function(t) {
 });
 
 tap.test('Calls publish function when already... "ready"', function(t) {
-  var message = 'test message';
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
 
   emitter.once('ready', function() {
     provider.publish(message);
     setTimeout(function() {
-      var expectedMessage = [
+      const expectedMessage = [
         validOptions.queueName,
         validOptions.queueName + ' ' + message
       ];
@@ -210,10 +208,10 @@ tap.test('Calls publish function when already... "ready"', function(t) {
 });
 
 tap.test('Emits an error when socket `send` throws an error', function(t) {
-  var message = 'test message';
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
-  var testError = new Error('test error');
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
+  const testError = new Error('test error');
   provider._pubSock.send = sinon.stub().throws(testError)
   provider.publish(message);
 
@@ -224,10 +222,10 @@ tap.test('Emits an error when socket `send` throws an error', function(t) {
 });
 
 tap.test('Subcribes to the queue', function(t) {
-  var expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
-  var expectedTopic = validOptions.queueName;
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
+  const expectedTopic = validOptions.queueName;
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
   provider.subscribe();
 
   emitter.once('ready', function() {
@@ -240,9 +238,9 @@ tap.test('Subcribes to the queue', function(t) {
 });
 
 tap.test('Emits a string message event after subscribing', function(t) {
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
-  var originalMessage = 'test message';
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
+  const originalMessage = 'test message';
   provider.subscribe();
 
   emitter.on('message', function(message) {
@@ -258,9 +256,9 @@ tap.test('Emits a string message event after subscribing', function(t) {
 });
 
 tap.test('Emits an object message event after subscribing', function(t) {
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
-  var originalMessage = { test: 'test', foo: 'bar' };
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
+  const originalMessage = { test: 'test', foo: 'bar' };
   provider.subscribe();
 
   emitter.on('message', function(message) {
@@ -276,9 +274,9 @@ tap.test('Emits an object message event after subscribing', function(t) {
 });
 
 tap.test('Emits a Buffer message event after subscribing', function(t) {
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
-  var originalMessage = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
+  const originalMessage = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   provider.subscribe();
 
   emitter.on('message', function(message) {
@@ -294,10 +292,10 @@ tap.test('Emits a Buffer message event after subscribing', function(t) {
 });
 
 tap.test('Subcribes to the queue when already... "ready"', function(t) {
-  var expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
-  var expectedTopic = validOptions.queueName;
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
+  const expectedTopic = validOptions.queueName;
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
 
   emitter.once('ready', function() {
     provider.subscribe();
@@ -310,9 +308,9 @@ tap.test('Subcribes to the queue when already... "ready"', function(t) {
 });
 
 tap.test('Unsubscribing disconnects the sub socket', function(t) {
-  var expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
 
   emitter.once('ready', function() {
     provider.subscribe();
@@ -329,9 +327,9 @@ tap.test('Unsubscribing disconnects the sub socket', function(t) {
 });
 
 tap.test('Unsubscribing when queue provider is "closed" is ignored', function(t) {
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
-  var removeCount = 0;
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
+  const removeCount = 0;
 
   emitter.once('ready', function() {
     provider.subscribe();
@@ -347,9 +345,9 @@ tap.test('Unsubscribing when queue provider is "closed" is ignored', function(t)
 });
 
 tap.test('The `close` method unbinds the pub socket', function(t) {
-  var expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
-  var emitter = new EventEmitter();
-  var provider = new ZmqProvider(emitter, validOptions);
+  const expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
+  const emitter = new EventEmitter();
+  const provider = new ZmqProvider(emitter, validOptions);
 
   emitter.once('ready', function() {
     provider.close();
