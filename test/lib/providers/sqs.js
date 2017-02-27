@@ -6,6 +6,8 @@ var proxyquire = require('proxyquire').noCallThru();
 var sinon = require('sinon');
 var tap = require('tap');
 
+var skip = false;
+
 var AWSStub = {
   config: {},
   SQS: sinon.stub()
@@ -371,7 +373,11 @@ tap.test('Sets `_isClosed` property to true on unsubscribe', function(t) {
   }, 10);
 });
 
-tap.test('`_poll` method is called repeatedly until unsubscribed', function(t) {
+if (process.platform === 'win32') {
+  skip = 'since timing this test uses is not reliable on windows';
+}
+
+tap.test('`_poll` method is called repeatedly until unsubscribed', { skip: skip }, function(t) {
   var providerOptions = { queueName: 'queue' };
   var emitter = new EventEmitter();
   var provider = new SqsProvider(emitter, providerOptions);
@@ -390,7 +396,7 @@ tap.test('`_poll` method is called repeatedly until unsubscribed', function(t) {
   }, 50);
 });
 
-tap.test('`_poll` method is called with delay as set in options', function(t) {
+tap.test('`_poll` method is called with delay as set in options', { skip: skip }, function(t) {
   var providerOptions = {
     queueName: 'queue',
     delayBetweenPolls: 0.01 // 10 milliseconds
