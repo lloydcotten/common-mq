@@ -15,14 +15,14 @@ const Queue = proxyquire('../../lib/queue', {
   './providers/zmq': ZmqStub
 });
 
-tap.beforeEach(function(done) {
+tap.beforeEach((done) => {
   AmqpStub.reset();
   SqsStub.reset();
   ZmqStub.reset();
   done();
 });
 
-tap.test('Instantiates a new AMQP Provider', function(t) {
+tap.test('Instantiates a new AMQP Provider', (t) => {
   const options = { provider: 'amqp' };
   const q = new Queue(options);
 
@@ -32,7 +32,7 @@ tap.test('Instantiates a new AMQP Provider', function(t) {
   t.end();
 });
 
-tap.test('Instantiates a new SQS Provider', function(t) {
+tap.test('Instantiates a new SQS Provider', (t) => {
   const options = { provider: 'sqs' };
   const q = new Queue(options);
 
@@ -42,7 +42,7 @@ tap.test('Instantiates a new SQS Provider', function(t) {
   t.end();
 });
 
-tap.test('Instantiates a new ZeroMQ Provider', function(t) {
+tap.test('Instantiates a new ZeroMQ Provider', (t) => {
   const options = { provider: 'zmq' };
   const q = new Queue(options);
 
@@ -52,58 +52,58 @@ tap.test('Instantiates a new ZeroMQ Provider', function(t) {
   t.end();
 });
 
-tap.test('Throws an error if provider not specified', function(t) {
+tap.test('Throws an error if provider not specified', (t) => {
   const expectedError = {
     message: /unable.+instantiate.+provider/i,
     provider: 'invalid',
     inner: {}
   };
 
-  t.throws(function () { new Queue({ provider: 'invalid' }) }, expectedError);
+  t.throws(() => new Queue({ provider: 'invalid' }), expectedError);
   t.end();
 });
 
-tap.test('Queue is an EventEmitter', function(t) {
+tap.test('Queue is an EventEmitter', (t) => {
   const q = new Queue({ provider: 'amqp' });
   t.type(q, EventEmitter);
   t.end();
 });
 
-tap.test('Queue is an EventEmitter', function(t) {
+tap.test('Queue is an EventEmitter', (t) => {
   const q = new Queue({ provider: 'amqp' });
   t.type(q, EventEmitter);
   t.end();
 });
 
-tap.test('Sets `isReady` property to `false`', function(t) {
+tap.test('Sets `isReady` property to `false`', (t) => {
   const q = new Queue({ provider: 'amqp' });
   t.equal(q.isReady, false);
   t.end();
 });
 
-tap.test('Calls provider `subscribe` method once when first listener is added', function(t) {
+tap.test('Calls provider `subscribe` method once when first listener is added', (t) => {
   const q = new Queue({ provider: 'amqp' });
   q._provider.subscribe = sinon.stub();
-  q.on('message', function() { });
-  q.on('message', function() { });
+  q.on('message', noop => noop);
+  q.on('message', noop => noop);
 
   // Defer this until next event loop, since `subscribe` should also be called on next tick
-  process.nextTick(function() {
+  setImmediate(() => {
     t.ok(q._provider.subscribe.called, 'Provider `subscribe` not called.');
     t.notOk(q._provider.subscribe.calledTwice, 'Provider `subscribe` called more than once.');
     t.end();
   });
 });
 
-tap.test('Calls provider `unsubscribe` method once when last listener is removed', function(t) {
+tap.test('Calls provider `unsubscribe` method once when last listener is removed', (t) => {
   const q = new Queue({ provider: 'amqp' });
   q._provider.subscribe = sinon.stub();
   q._provider.unsubscribe = sinon.stub();
-  q.on('message', function() { });
-  q.on('message', function() { });
+  q.on('message', noop => noop);
+  q.on('message', noop => noop);
 
   // Defer this until next event loop, since `subscribe` should also be called on next tick
-  process.nextTick(function() {
+  setImmediate(() => {
     q.removeAllListeners('message');
     t.ok(q._provider.unsubscribe.called, 'Provider `unsubscribe` not called.');
     t.notOk(q._provider.unsubscribe.calledTwice, 'Provider `unsubscribe` called more than once.');
@@ -111,22 +111,22 @@ tap.test('Calls provider `unsubscribe` method once when last listener is removed
   });
 });
 
-tap.test('Does not unsubscribe from provider if "removeListener" event name is not "message"', function(t) {
+tap.test('Does not unsubscribe from provider if "removeListener" event name is not "message"', (t) => {
   const q = new Queue({ provider: 'amqp' });
   q._provider.subscribe = sinon.stub();
   q._provider.unsubscribe = sinon.stub();
-  q.on('message', function() { });
-  q.on('foobar', function() { });
+  q.on('message', noop => noop);
+  q.on('foobar', noop => noop);
 
   // Defer this until next event loop, since `subscribe` should also be called on next tick
-  process.nextTick(function() {
+  setImmediate(() => {
     q.removeAllListeners('foobar');
     t.notOk(q._provider.unsubscribe.called, 'Provider `unsubscribe` should not have been called.');
     t.end();
   });
 });
 
-tap.test('Forwards message publishing to the provider', function(t) {
+tap.test('Forwards message publishing to the provider', (t) => {
   const q = new Queue({ provider: 'amqp' });
   const expectedMessage = 'a value';
   q._provider.publish = sinon.stub();
@@ -136,7 +136,7 @@ tap.test('Forwards message publishing to the provider', function(t) {
   t.end();
 });
 
-tap.test('Forwards message ack to the provider', function(t) {
+tap.test('Forwards message ack to the provider', (t) => {
   const q = new Queue({ provider: 'amqp' });
   const expectedMessageId = 'message-id';
   q._provider.ack = sinon.stub();
@@ -146,7 +146,7 @@ tap.test('Forwards message ack to the provider', function(t) {
   t.end();
 });
 
-tap.test('Forwards queue close to the provider', function(t) {
+tap.test('Forwards queue close to the provider', (t) => {
   const q = new Queue({ provider: 'amqp' });
   q._provider.close = sinon.stub();
   q.close();

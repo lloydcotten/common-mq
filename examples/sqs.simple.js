@@ -20,46 +20,33 @@ const queue = mq.connect('sqs://hello', {
 
 });
 
-queue.on('ready', function() {
+queue.on('ready', () => {
   console.log('queue ready');
-  startPublishing(function() {
+  startPublishing(() => {
     queue.removeAllListeners('message');
     console.log('unsubscribed');
   });
 
-  setTimeout(close, 10000);
+  setTimeout(() => console.log('SQS queues do not need to be closed'), 10000);
 });
 
-queue.on('message', printMessage);
-
-queue.on('error', function(err) {
+queue.on('message', (message) => console.log(message));
+queue.on('error', (err) => {
   console.log(err);
   console.log('Do you need to setup your environment with your AWS credentials?');
   console.log('http://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html');
 });
 
-function printMessage(message) {
-  console.log(message);
-}
-
-function close() {
-  console.log('SQS queues do not need to be closed');
-}
-
 function startPublishing(done) {
-  setTimeout(publishOne, 1000);
-  setTimeout(publishOne, 2000);
-  setTimeout(publishOne, 3000);
+  setTimeout(() => queue.publish('hello world: ' + new Date()), 1000);
+  setTimeout(() => queue.publish('hello world: ' + new Date()), 2000);
+  setTimeout(() => queue.publish('hello world: ' + new Date()), 3000);
 
   // This one will not be emitted since it occurs
   // after the listener is removed
   // It will however be received if you run the example again
   // It is included to demonstrate this behavior
-  setTimeout(publishOne, 9000);
+  setTimeout(() => queue.publish('hello world: ' + new Date()), 9000);
 
   setTimeout(done, 8000);
-}
-
-function publishOne() {
-  queue.publish('hello world: ' + new Date());
 }

@@ -10,42 +10,42 @@ const mq = proxyquire('../', {
   './lib/queue': QueueStub
 });
 
-tap.beforeEach(function(done) {
+tap.beforeEach((done) => {
   QueueStub.reset();
   done();
 });
 
-tap.test('Main export has function called `connect`', function(t) {
+tap.test('Main export has function called `connect`', (t) => {
   t.type(mq.connect, 'function');
   t.end();
 });
 
-tap.test('Throw an error if no args used', function(t) {
-  t.throws(function() { mq.connect(); }, { message: /url.+not.+set/i });
+tap.test('Throw an error if no args used', (t) => {
+  t.throws(() => mq.connect(), { message: /url.+not.+set/i });
   t.end();
 });
 
-tap.test('Throw an error if url not a string or object', function(t) {
-  t.throws(function() { mq.connect(1); }, { message: /url.+must.+string.+options.+object/i });
+tap.test('Throw an error if url not a string or object', (t) => {
+  t.throws(() => mq.connect(1), { message: /url.+must.+string.+options.+object/i });
   t.end();
 });
 
-tap.test('Throw an error if url string is not in expected format', function(t) {
-  t.throws(function() { mq.connect('invalid url string'); }, { message: /invalid.+url/i });
+tap.test('Throw an error if url string is not in expected format', (t) => {
+  t.throws(() => mq.connect('invalid url string'), { message: /invalid.+url/i });
   t.end();
 });
 
-tap.test('Throw an error if options object does not contain a `provider` property', function(t) {
-  t.throws(function() { mq.connect({}); }, { message: /provider.+missing/i });
+tap.test('Throw an error if options object does not contain a `provider` property', (t) => {
+  t.throws(() => mq.connect({}), { message: /provider.+missing/i });
   t.end();
 });
 
-tap.test('Throw an error if options object does not contain a `queueName` property', function(t) {
-  t.throws(function() { mq.connect({ provider: 'test' }); }, { message: /queueName.+missing/i });
+tap.test('Throw an error if options object does not contain a `queueName` property', (t) => {
+  t.throws(() => mq.connect({ provider: 'test' }), { message: /queueName.+missing/i });
   t.end();
 });
 
-tap.test('Instantiates a new queue', function(t) {
+tap.test('Instantiates a new queue', (t) => {
   const queue = mq.connect('test://queue');
   const expectedOptions = {
     provider: 'test',
@@ -59,7 +59,7 @@ tap.test('Instantiates a new queue', function(t) {
   t.end();
 });
 
-tap.test('Instantiates a new queue when using options object', function(t) {
+tap.test('Instantiates a new queue when using options object', (t) => {
   const options = {
     provider: 'test',
     queueName: 'queue'
@@ -71,7 +71,7 @@ tap.test('Instantiates a new queue when using options object', function(t) {
   t.end();
 });
 
-tap.test('Instantiates a new queue when string URL and options object', function(t) {
+tap.test('Instantiates a new queue when string URL and options object', (t) => {
   const queue = mq.connect('test://queue', { customProperty: 'test' });
   const expectedOptions = {
     provider: 'test',

@@ -21,7 +21,7 @@ const SubscribePromise = function() { };
 const fakeConsumerTag = 'test123';
 
 
-tap.beforeEach(function(done) {
+tap.beforeEach((done) => {
   amqpStub.createConnection = sinon.stub().returns(new AmqpConnectionStub());
 
   SubscribePromise.prototype.addCallback = sinon.stub().callsArgWith(0, {
@@ -44,45 +44,47 @@ tap.beforeEach(function(done) {
   done();
 });
 
-tap.test('Throws an error if `emitter` arg is not set', function(t) {
-  t.throws(function() { new AmqpProvider(); }, { message: /emitter.+not.+set/i });
+tap.test('Throws an error if `emitter` arg is not set', (t) => {
+  t.throws(() => new AmqpProvider(), { message: /emitter.+not.+set/i });
   t.end();
 });
 
-tap.test('Throws an error if `options` args is not set', function(t) {
-  t.throws(function() { new AmqpProvider({}); }, { message: /options.+not.+set/i });
+tap.test('Throws an error if `options` args is not set', (t) => {
+  t.throws(() => new AmqpProvider({}), { message: /options.+not.+set/i });
   t.end();
 });
 
-tap.test('Throws an error if `options` args is missing `queueName` property', function(t) {
+tap.test('Throws an error if `options` args is missing `queueName` property', (t) => {
   const providerOptions = {};
 
-  t.throws(function() { new AmqpProvider({}, providerOptions); }, { message: /queueName.+not.+set/i });
+  t.throws(() => new AmqpProvider({}, providerOptions), { message: /queueName.+not.+set/i });
   t.end();
 });
 
-tap.test('Throws an error if `options` args is missing `exchangeName` property', function(t) {
+tap.test('Throws an error if `options` args is missing `exchangeName` property', (t) => {
   const providerOptions = {
     queueName: 'queue'
   };
 
-  t.throws(function() { new AmqpProvider({}, providerOptions); }, { message: /exchangeName.+not.+set/i });
+  t.throws(() => new AmqpProvider({}, providerOptions), { message: /exchangeName.+not.+set/i });
   t.end();
 });
 
-tap.test('Does not throw an error if args are valid', function(t) {
+tap.test('Does not throw an error if args are valid', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
   };
 
-  sinon.stub(AmqpProvider.prototype, '_initProvider', function() { });
-  t.doesNotThrow(function() { new AmqpProvider({}, providerOptions); });
-  AmqpProvider.prototype._initProvider.restore();
-  t.end();
+  sinon.stub(AmqpProvider.prototype, '_initProvider', noop => noop);
+  t.doesNotThrow(() => new AmqpProvider({}, providerOptions));
+  setImmediate(() => {
+    AmqpProvider.prototype._initProvider.restore();
+    t.end();
+  });
 });
 
-tap.test('Creates a connection with provider options', function(t) {
+tap.test('Creates a connection with provider options', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -90,14 +92,14 @@ tap.test('Creates a connection with provider options', function(t) {
   const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
-  setTimeout(function() {
+  setImmediate(() => {
     t.ok(amqpStub.createConnection.called);
     t.equal(amqpStub.createConnection.getCall(0).args[0], providerOptions);
     t.end();
-  }, 10);
+  });
 });
 
-tap.test('Creates an exchange using specified name', function(t) {
+tap.test('Creates an exchange using specified name', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -105,19 +107,19 @@ tap.test('Creates an exchange using specified name', function(t) {
   const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
-  setTimeout(function() {
+  setImmediate(() => {
     t.ok(provider._connection);
     provider._connection.emit('ready');
-    setTimeout(function() {
+    setImmediate(() => {
       t.ok(provider._connection.exchange.called);
       t.equal(provider._connection.exchange.getCall(0).args[0], providerOptions.exchangeName);
       t.equal(typeof provider._connection.exchange.getCall(0).args[2], 'function');
       t.end();
-    }, 10);
-  }, 10);
+    });
+  });
 });
 
-tap.test('Creates a queue using specified name', function(t) {
+tap.test('Creates a queue using specified name', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -125,17 +127,17 @@ tap.test('Creates a queue using specified name', function(t) {
   const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
-  setTimeout(function() {
+  setImmediate(() => {
     provider._connection.emit('ready');
-    setTimeout(function() {
+    setImmediate(() => {
       t.equal(provider._connection.queue.getCall(0).args[0], providerOptions.queueName);
       t.equal(typeof provider._connection.queue.getCall(0).args[2], 'function');
       t.end();
-    }, 10);
-  }, 10);
+    });
+  });
 });
 
-tap.test('Binds the queue to the exchange', function(t) {
+tap.test('Binds the queue to the exchange', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -143,18 +145,18 @@ tap.test('Binds the queue to the exchange', function(t) {
   const provider = new AmqpProvider(new EventEmitter(), providerOptions);
 
   // Defer these tests since provider is initialized on next event loop
-  setTimeout(function() {
+  setImmediate(() => {
     provider._connection.emit('ready');
-    setTimeout(function() {
+    setImmediate(() => {
       t.ok(provider._queue);
       t.equal(provider._queue.bind.getCall(0).args[0], providerOptions.exchangeName);
       t.equal(provider._queue.bind.getCall(0).args[1], '#');
       t.end();
-    }, 10);
-  }, 10);
+    });
+  });
 });
 
-tap.test('Sets emmitter to ready', function(t) {
+tap.test('Sets emmitter to ready', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -163,15 +165,15 @@ tap.test('Sets emmitter to ready', function(t) {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
+  emitter.once('ready', () => {
     t.equal(emitter.isReady, true);
     t.end();
   });
 });
 
-tap.test('Calls publish function with string message', function(t) {
+tap.test('Calls publish function with string message', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -183,19 +185,19 @@ tap.test('Calls publish function with string message', function(t) {
   provider.publish(message);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       t.ok(provider._exchange.publish.called);
       t.equal(provider._exchange.publish.getCall(0).args[0], providerOptions.queueName);
       t.equal(provider._exchange.publish.getCall(0).args[1], message);
       t.end();
-    }, 20);
+    });
   });
 });
 
-tap.test('Calls publish function with JSON string', function(t) {
+tap.test('Calls publish function with JSON string', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -207,19 +209,19 @@ tap.test('Calls publish function with JSON string', function(t) {
   provider.publish(message);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       t.ok(provider._exchange.publish.called);
       t.equal(provider._exchange.publish.getCall(0).args[0], providerOptions.queueName);
       t.equal(provider._exchange.publish.getCall(0).args[1], JSON.stringify(message));
       t.end();
-    }, 20);
+    });
   });
 });
 
-tap.test('Calls publish function with Buffer', function(t) {
+tap.test('Calls publish function with Buffer', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -231,19 +233,19 @@ tap.test('Calls publish function with Buffer', function(t) {
   provider.publish(message);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       t.ok(provider._exchange.publish.called);
       t.equal(provider._exchange.publish.getCall(0).args[0], providerOptions.queueName);
       t.equal(provider._exchange.publish.getCall(0).args[1], message.toString('base64'));
       t.end();
-    }, 20);
+    });
   });
 });
 
-tap.test('Calls publish function when already... "ready"', function(t) {
+tap.test('Calls publish function when already... "ready"', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -253,20 +255,20 @@ tap.test('Calls publish function when already... "ready"', function(t) {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
+  emitter.once('ready', () => {
     provider.publish(message);
-    setTimeout(function() {
+    setImmediate(() => {
       t.ok(provider._exchange.publish.called);
       t.equal(provider._exchange.publish.getCall(0).args[0], providerOptions.queueName);
       t.equal(provider._exchange.publish.getCall(0).args[1], message);
       t.end();
-    }, 10);
+    });
   });
 });
 
-tap.test('Subscribes to the queue with a listener', function(t) {
+tap.test('Subscribes to the queue with a listener', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -276,19 +278,19 @@ tap.test('Subscribes to the queue with a listener', function(t) {
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       t.ok(provider._queue.subscribe.called);
       t.equal(provider._ctag, fakeConsumerTag);
       t.equal(typeof provider._queue.subscribe.getCall(0).args[0], 'function');
       t.end();
-    }, 20);
+    });
   });
 });
 
-tap.test('Emits a string message event after subscribing', function(t) {
+tap.test('Emits a string message event after subscribing', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -298,23 +300,23 @@ tap.test('Emits a string message event after subscribing', function(t) {
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       const handler = provider._queue.subscribe.getCall(0).args[0];
       const originalMessage = 'test message';
-      emitter.on('message', function(message) {
+      emitter.on('message', (message) => {
         t.equal(message, originalMessage);
         t.end();
       });
 
       handler({ data: originalMessage });
-    }, 20);
+    });
   });
 });
 
-tap.test('Emits an object message event after subscribing', function(t) {
+tap.test('Emits an object message event after subscribing', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -324,23 +326,23 @@ tap.test('Emits an object message event after subscribing', function(t) {
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       const handler = provider._queue.subscribe.getCall(0).args[0];
       const originalMessage = { test: 'test', foo: 'bar' };
-      emitter.on('message', function(message) {
+      emitter.on('message', (message) => {
         t.same(message, originalMessage);
         t.end();
       });
 
       handler({ data: JSON.stringify(originalMessage) });
-    }, 20);
+    });
   });
 });
 
-tap.test('Emits a Buffer message event after subscribing', function(t) {
+tap.test('Emits a Buffer message event after subscribing', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -350,23 +352,23 @@ tap.test('Emits a Buffer message event after subscribing', function(t) {
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       const handler = provider._queue.subscribe.getCall(0).args[0];
       const originalMessage = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-      emitter.on('message', function(message) {
+      emitter.on('message', (message) => {
         t.same(message, originalMessage);
         t.end();
       });
 
       handler({ data: originalMessage.toString('base64') });
-    }, 20);
+    });
   });
 });
 
-tap.test('Subcribes to the queue with a listener when already... "ready"', function(t) {
+tap.test('Subcribes to the queue with a listener when already... "ready"', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -375,19 +377,19 @@ tap.test('Subcribes to the queue with a listener when already... "ready"', funct
   const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
+  emitter.once('ready', () => {
     provider.subscribe();
-    setTimeout(function() {
+    setImmediate(() => {
       t.ok(provider._queue.subscribe.called);
       t.equal(typeof provider._queue.subscribe.getCall(0).args[0], 'function');
       t.end();
-    }, 20);
+    });
   });
 });
 
-tap.test('Unsubscribes from the queue the queue', function(t) {
+tap.test('Unsubscribes from the queue the queue', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -397,21 +399,21 @@ tap.test('Unsubscribes from the queue the queue', function(t) {
   provider.subscribe();
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       provider.unsubscribe();
-      setTimeout(function() {
+      setImmediate(() => {
         t.ok(provider._queue.unsubscribe.called);
         t.equal(provider._queue.unsubscribe.firstCall.args[0], fakeConsumerTag);
         t.end();
-      }, 10);
-    }, 10);
+      });
+    });
   });
 });
 
-tap.test('Unbinds from the queue on close', function(t) {
+tap.test('Unbinds from the queue on close', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -420,20 +422,20 @@ tap.test('Unbinds from the queue on close', function(t) {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       provider.close();
       t.ok(provider._queue.unbind.called);
       t.equal(provider._queue.unbind.firstCall.args[0], provider._exchange);
       t.equal(provider._queue.unbind.firstCall.args[1], '#');
       t.end();
-    }, 10);
+    });
   });
 });
 
-tap.test('Destroys the exchange and queue on close', function(t) {
+tap.test('Destroys the exchange and queue on close', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -442,19 +444,19 @@ tap.test('Destroys the exchange and queue on close', function(t) {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       provider.close();
       t.ok(provider._queue.destroy.called);
       t.ok(provider._exchange.destroy.called);
       t.end();
-    }, 10);
+    });
   });
 });
 
-tap.test('Disconnects the connection on close', function(t) {
+tap.test('Disconnects the connection on close', (t) => {
   const providerOptions = {
     queueName: 'queue',
     exchangeName: 'exchange'
@@ -463,13 +465,13 @@ tap.test('Disconnects the connection on close', function(t) {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   // Defer this emit since provider is initialized on next event loop
-  setTimeout(function() { provider._connection.emit('ready'); }, 10);
+  setImmediate(() => provider._connection.emit('ready'));
 
-  emitter.once('ready', function() {
-    setTimeout(function() {
+  emitter.once('ready', () => {
+    setImmediate(() => {
       provider.close();
       t.ok(provider._connection.disconnect.called);
       t.end();
-    }, 10);
+    });
   });
 });
