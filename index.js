@@ -4,7 +4,7 @@ const assert = require('assert');
 const parseUrl = require('url').parse;
 const Queue = require('./lib/queue');
 
-module.exports = exports = {
+module.exports = {
   connect: function(url, options) {
     validateArgs(url, options);
 
