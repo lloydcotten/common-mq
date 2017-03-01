@@ -73,8 +73,10 @@ tap.test('Throws an error if `options` args is missing `port` property', functio
 tap.test('Does not throw an error if args are valid', function(t) {
   sinon.stub(ZmqProvider.prototype, '_initProvider', function() { });
   t.doesNotThrow(function() { new ZmqProvider({}, validOptions); });
-  ZmqProvider.prototype._initProvider.restore();
-  t.end();
+  setImmediate(() => {
+    ZmqProvider.prototype._initProvider.restore();
+    t.end();
+  });
 });
 
 tap.test('Creates a sub socket', function(t) {
@@ -98,12 +100,12 @@ tap.test('Binds to the pub socket', function(t) {
   const expectedUrl = 'tcp://' + validOptions.hostname + ':' + validOptions.port;
 
   // Defer these tests since provider is initialized on next event loop
-  setTimeout(function() {
+  setImmediate(function() {
     t.ok(provider._pubSock.bind.called);
     t.equal(provider._pubSock.bind.getCall(0).args[0], expectedUrl);
     t.equal(typeof provider._pubSock.bind.getCall(0).args[1], 'function');
     t.end();
-  }, 10);
+  });
 });
 
 tap.test('Sets emmitter to ready once bound to pub socket', function(t) {
@@ -136,15 +138,12 @@ tap.test('Calls socket `send` function with string message', function(t) {
   provider.publish(message);
 
   emitter.once('ready', function() {
-    setTimeout(function() {
-      const expectedMessage = [
-        validOptions.queueName,
-        validOptions.queueName + ' ' + message
-      ];
+    setImmediate(function() {
+      const expectedMessage = [validOptions.queueName, message];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
-    }, 10);
+    });
   });
 });
 
@@ -156,15 +155,12 @@ tap.test('Calls socket `send` function with JSON string', function(t) {
   provider.publish(message);
 
   emitter.once('ready', function() {
-    setTimeout(function() {
-      const expectedMessage = [
-        validOptions.queueName,
-        validOptions.queueName + ' ' + JSON.stringify(message)
-      ];
+    setImmediate(function() {
+      const expectedMessage = [validOptions.queueName, JSON.stringify(message)];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
-    }, 10);
+    });
   });
 });
 
@@ -176,15 +172,12 @@ tap.test('Calls socket `send` function with Buffer', function(t) {
   provider.publish(message);
 
   emitter.once('ready', function() {
-    setTimeout(function() {
-      const expectedMessage = [
-        validOptions.queueName,
-        validOptions.queueName + ' ' + message.toString('base64')
-      ];
+    setImmediate(function() {
+      const expectedMessage = [validOptions.queueName, message.toString('base64')];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
-    }, 10);
+    });
   });
 });
 
@@ -195,15 +188,12 @@ tap.test('Calls publish function when already... "ready"', function(t) {
 
   emitter.once('ready', function() {
     provider.publish(message);
-    setTimeout(function() {
-      const expectedMessage = [
-        validOptions.queueName,
-        validOptions.queueName + ' ' + message
-      ];
+    setImmediate(function() {
+      const expectedMessage = [validOptions.queueName, message];
       t.ok(provider._pubSock.send.called);
       t.same(provider._pubSock.send.getCall(0).args[0], expectedMessage);
       t.end();
-    }, 10);
+    });
   });
 });
 
@@ -229,11 +219,11 @@ tap.test('Subcribes to the queue', function(t) {
   provider.subscribe();
 
   emitter.once('ready', function() {
-    setTimeout(function() {
+    setImmediate(function() {
       t.ok(provider._subSock.connect.calledWith(expectedUrl));
       t.ok(provider._subSock.subscribe.calledWith(expectedTopic));
       t.end();
-    }, 10);
+    });
   });
 });
 
@@ -249,9 +239,9 @@ tap.test('Emits a string message event after subscribing', function(t) {
   });
 
   emitter.once('ready', function() {
-    setTimeout(function() {
+    setImmediate(function() {
       provider._subSock.emit('message', validOptions.queueName, originalMessage);
-    }, 20);
+    });
   });
 });
 
@@ -267,9 +257,9 @@ tap.test('Emits an object message event after subscribing', function(t) {
   });
 
   emitter.once('ready', function() {
-    setTimeout(function() {
+    setImmediate(function() {
       provider._subSock.emit('message', validOptions.queueName, JSON.stringify(originalMessage));
-    }, 20);
+    });
   });
 });
 
@@ -285,9 +275,9 @@ tap.test('Emits a Buffer message event after subscribing', function(t) {
   });
 
   emitter.once('ready', function() {
-    setTimeout(function() {
+    setImmediate(function() {
       provider._subSock.emit('message', validOptions.queueName, originalMessage.toString('base64'));
-    }, 20);
+    });
   });
 });
 
@@ -299,11 +289,11 @@ tap.test('Subcribes to the queue when already... "ready"', function(t) {
 
   emitter.once('ready', function() {
     provider.subscribe();
-    setTimeout(function() {
+    setImmediate(function() {
       t.ok(provider._subSock.connect.calledWith(expectedUrl));
       t.ok(provider._subSock.subscribe.calledWith(expectedTopic));
       t.end();
-    }, 10);
+    });
   });
 });
 
@@ -314,15 +304,15 @@ tap.test('Unsubscribing disconnects the sub socket', function(t) {
 
   emitter.once('ready', function() {
     provider.subscribe();
-    setTimeout(function() {
+    setImmediate(function() {
       provider.unsubscribe();
-      setTimeout(function() {
+      setImmediate(function() {
         t.ok(provider._subSock.disconnect.called);
         t.equal(provider._subSock.disconnect.getCall(0).args[0], expectedUrl);
         t.ok(provider._isClosed);
         t.end();
-      }, 10);
-    }, 10);
+      });
+    });
   });
 });
 
@@ -333,14 +323,14 @@ tap.test('Unsubscribing when queue provider is "closed" is ignored', function(t)
 
   emitter.once('ready', function() {
     provider.subscribe();
-    setTimeout(function() {
+    setImmediate(function() {
       provider.unsubscribe();
       provider.unsubscribe();
-      setTimeout(function() {
+      setImmediate(function() {
         t.ok(provider._subSock.disconnect.calledOnce);
         t.end();
-      }, 10);
-    }, 10);
+      });
+    });
   });
 });
 
