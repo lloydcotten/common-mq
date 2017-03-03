@@ -4,10 +4,12 @@
   "description": "Abstracted message queue client for node.js supporting multiple message queue providers.",
   "main": "index.js",
   "scripts": {
-    "test": "tap test -J",
+    "test": "npm run lint && npm run test:standard",
+    "test:standard": "tap test -J",
     "test:bail": "tap test -J --bail",
-    "cover": "tap test -J --cov",
+    "cover": "npm run lint && npm run test:standard -- --cov",
     "cover:html": "tap test -J --cov --coverage-report=html",
+    "lint": "eslint ./",
     "example:zmq": "node examples/zero.simple.js",
     "example:sqs": "node examples/sqs.simple.js",
     "example:amqp": "node examples/amqp.simple.js",
@@ -22,6 +24,9 @@
     "zeromq": "4.1.x"
   },
   "devDependencies": {
+    "eslint": "3.16.x",
+    "eslint-config-airbnb-base": "11.1.x",
+    "eslint-plugin-import": "2.2.x",
     "proxyquire": "1.7.x",
     "sinon": "1.17.x",
     "tap": "10.2.x"
