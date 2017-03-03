@@ -4,36 +4,34 @@ const assert = require('assert');
 const parseUrl = require('url').parse;
 const Queue = require('./lib/queue');
 
-module.exports = {
-  connect: function(url, options) {
-    validateArgs(url, options);
-
-    if (typeof url === 'string') {
-      url = parseUrl(url);
-      options = options || {};
-      options.hostname = url.hostname;
-      options.queueName = url.pathname || url.hostname;
-      options.queueName = options.queueName.replace(/^\/|\/$/g, '');
-      options.port = url.port;
-      options.provider = url.protocol.substring(0, url.protocol.length - 1);
-    } else {
-      // assume only options where passed (no url)
-      options = url;
-    }
-
-    return new Queue(options);
-  }
-};
-
-function validateArgs(url, options) {
-  assert(url, 'Queue URL or options not set.');
-  assert((typeof url === 'string') || (typeof url === 'object'),
+function validateArgs(urlOrOptions) {
+  assert(urlOrOptions, 'Queue URL or options not set.');
+  assert((typeof urlOrOptions === 'string') || (typeof urlOrOptions === 'object'),
          'Queue URL must be string or options object set.');
-  if (typeof url === 'string') {
-    assert(/[a-z0-9]+:\/\/[a-z\-0-9.\/]+/i.test(url),
-           'Invalid queue URL.')
+  if (typeof urlOrOptions === 'string') {
+    assert(/[a-z0-9]+:\/\/[a-z\-0-9./]+/i.test(urlOrOptions),
+           'Invalid queue URL.');
   } else {
-    assert(url.provider, '`provider` property is missing.');
-    assert(url.queueName, '`queueName` property is missing.');
+    assert(urlOrOptions.provider, '`provider` property is missing.');
+    assert(urlOrOptions.queueName, '`queueName` property is missing.');
   }
 }
+
+module.exports.connect = function connect(url, options) {
+  validateArgs(url);
+
+  let queueOptions = options || {};
+  if (typeof url === 'string') {
+    const urlObj = parseUrl(url);
+    queueOptions.hostname = urlObj.hostname;
+    queueOptions.queueName = urlObj.pathname || urlObj.hostname;
+    queueOptions.queueName = queueOptions.queueName.replace(/^\/|\/$/g, '');
+    queueOptions.port = urlObj.port;
+    queueOptions.provider = urlObj.protocol.substring(0, urlObj.protocol.length - 1);
+  } else {
+    // assume only options where passed (no url)
+    queueOptions = url;
+  }
+
+  return new Queue(queueOptions);
+};
