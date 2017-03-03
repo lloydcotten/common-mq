@@ -20,6 +20,10 @@ const AmqpProvider = proxyquire('../../../lib/providers/amqp', {
 const SubscribePromise = function() { };
 const fakeConsumerTag = 'test123';
 
+function emitFakeReady(provider) {
+  // Defer this emit since provider is initialized on next event loop
+  setImmediate(() => provider._connection.emit('ready'));
+}
 
 tap.beforeEach((done) => {
   amqpStub.createConnection = sinon.stub().returns(new AmqpConnectionStub());
@@ -163,9 +167,7 @@ tap.test('Sets emmitter to ready', (t) => {
   };
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     t.equal(emitter.isReady, true);
@@ -183,9 +185,7 @@ tap.test('Calls publish function with string message', (t) => {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   provider.publish(message);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -207,9 +207,7 @@ tap.test('Calls publish function with JSON string', (t) => {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   provider.publish(message);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -231,9 +229,7 @@ tap.test('Calls publish function with Buffer', (t) => {
   const provider = new AmqpProvider(emitter, providerOptions);
 
   provider.publish(message);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -253,9 +249,7 @@ tap.test('Calls publish function when already... "ready"', (t) => {
   const message = 'test message';
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     provider.publish(message);
@@ -276,9 +270,7 @@ tap.test('Subscribes to the queue with a listener', (t) => {
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -298,9 +290,7 @@ tap.test('Emits a string message event after subscribing', (t) => {
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -324,9 +314,7 @@ tap.test('Emits an object message event after subscribing', (t) => {
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -350,9 +338,7 @@ tap.test('Emits a Buffer message event after subscribing', (t) => {
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -375,9 +361,7 @@ tap.test('Subcribes to the queue with a listener when already... "ready"', (t) =
   };
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     provider.subscribe();
@@ -397,9 +381,7 @@ tap.test('Unsubscribes from the queue the queue', (t) => {
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
   provider.subscribe();
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -420,9 +402,7 @@ tap.test('Unbinds from the queue on close', (t) => {
   };
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -442,9 +422,7 @@ tap.test('Destroys the exchange and queue on close', (t) => {
   };
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
@@ -463,9 +441,7 @@ tap.test('Disconnects the connection on close', (t) => {
   };
   const emitter = new EventEmitter();
   const provider = new AmqpProvider(emitter, providerOptions);
-
-  // Defer this emit since provider is initialized on next event loop
-  setImmediate(() => provider._connection.emit('ready'));
+  emitFakeReady(provider);
 
   emitter.once('ready', () => {
     setImmediate(() => {
