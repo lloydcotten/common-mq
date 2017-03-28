@@ -18,13 +18,14 @@
   "author": "Lloyd Cotten",
   "license": "MIT",
   "dependencies": {
+    "amqp": "0.2.x",
+    "amqplib": "0.5.x",
     "async": "2.1.x",
     "aws-sdk": "2.22.x",
-    "amqp": "0.2.x",
     "zeromq": "4.1.x"
   },
   "devDependencies": {
-    "eslint": "3.16.x",
+    "eslint": "3.x",
     "eslint-config-airbnb-base": "11.1.x",
     "eslint-plugin-import": "2.2.x",
     "proxyquire": "1.7.x",
