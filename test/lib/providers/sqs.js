@@ -252,6 +252,30 @@ tap.test('Calls publish function with string message', (t) => {
   });
 });
 
+tap.test('Calls publish function with string message and dictionary of options', (t) => {
+  const providerOptions = { queueName: 'queue' };
+  const message = 'test message';
+  const emitter = new EventEmitter();
+  const provider = createProvider(emitter, providerOptions);
+
+  provider.publish(message, { test: 'test' });
+
+  emitter.once('ready', () => {
+    // Defer this test to wait for all deferred methods in provider to run
+    setImmediate(() => {
+      const expectedParams = {
+        QueueUrl: provider.queueUrl,
+        MessageBody: message,
+        test: 'test',
+      };
+
+      t.ok(provider.sqs.sendMessage.called);
+      t.same(provider.sqs.sendMessage.getCall(0).args[0], expectedParams);
+      t.end();
+    });
+  });
+});
+
 tap.test('Calls publish function with JSON string', (t) => {
   const providerOptions = { queueName: 'queue' };
   const message = { test: 'obj', foo: 'bar' };
