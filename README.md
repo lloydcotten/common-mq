@@ -142,13 +142,19 @@ queue.on('error', function(error) {
 });
 ```
 
-#### .publish(message)
+#### .publish(message [, options])
 Publishes a message to the queue. `message` can be a JavaScript object, a string, or a Buffer.
+
+The optional `options` argument passes provider-specific options to the related publishing
+functionality of the queue provider used.
 
 ```javascript
 queue.publish('This is a string message');
 queue.publish({ foo: 'bar', baz: 3 });
 queue.publish(new Buffer([1, 2, 3, 4, 5, 6, 7, 8]));
+
+// Example with SQS publish options
+queue.publish('My message', { 'MessageDeduplicationId': 'abcdef123456' });
 ```
 
 #### .ack(messageId)

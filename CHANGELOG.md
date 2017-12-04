@@ -1,3 +1,8 @@
+
+# v0.4.0 (2017-12-03)
+New features:
+- Add new options arg to `publish` function
+
 # v0.3.0 (2017-02-27)
 No known breaking changes.  We're now complying with semver from here forward.
 
